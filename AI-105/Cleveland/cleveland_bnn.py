@@ -53,24 +53,52 @@ def main():
     delimiter="\t", skiprows=0, dtype=np.float32)
 
   # 2. define model
+  # 47:00
+  #  seed user recommends glrot for seed initialziation
+  # ? cannot find network
+  # initialztion affects NN very muich
   init = K.initializers.RandomNormal(mean=0.0, stddev=0.01, seed=1)
+  
+  # adadelta not recommened?
+  # ? study what it means
   simple_adadelta = K.optimizers.Adadelta()
+  # input layer is 18
   X = K.layers.Input(shape=(18,))
+  # hidden layer = 10
+  # relu : rectify linear unit
+  # for multipl hidden layer, using relu
+  # for singel hiddent layer, usng tanh
+  # ? no explaing the reason heuristic
   net = K.layers.Dense(units=10, kernel_initializer=init,
     activation='relu')(X)
   net = K.layers.Dropout(0.25)(net)  # dropout for layer above
   net = K.layers.Dense(units=10, kernel_initializer=init,
     activation='relu')(net) 
+  # ? no explaning
   net = K.layers.Dropout(0.25)(net)  # dropout for layer above
+  
+  # output layer = 1
+  # important point for binary classfiication
+  # sigmoid : 0 to 1
   net = K.layers.Dense(units=1, kernel_initializer=init,
     activation='sigmoid')(net)
   model = K.models.Model(X, net) 
 
+  # specific loss function for binary problem
+  # used in adadelta
+  # question for binary, could you use mean sqaure error
+  # my : no since that is for linear reression
+  # author : yes ..... but do not say why
+  
   model.compile(loss='binary_crossentropy', optimizer=simple_adadelta,
     metrics=['acc'])
 
   # 3. train model
+  # epochs does affect the result
+  # 54:00 discuss different types of training
   bat_size = 8
+  # epochs : examining all data in one time
+  # more epochs mroe overfitting
   max_epochs = 2000
   my_logger = MyLogger(int(max_epochs/5))
 
@@ -81,6 +109,8 @@ def main():
   print("Training finished \n")
 
   # 4. evaluate model
+  # eval[0] : loss function value
+  # eval[1]: accuracy
   eval = model.evaluate(test_x, test_y, verbose=0)
   print("Evaluation on test data: loss = %0.4f  accuracy = %0.2f%% \n" \
     % (eval[0], eval[1]*100) )
